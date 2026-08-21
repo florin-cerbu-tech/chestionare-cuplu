@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chestionare terapie de cuplu</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#2b2b33; --muted:#6f6f7a;
+    --accent:#4a6d5c; --accent-soft:#e3ece7; --border:#e2ded5; --danger:#a05a4a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+  h1{font-size:1.5rem;margin:0 0 4px}
+  h2{font-size:1.15rem;margin:0 0 8px}
+  .muted{color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-top:20px}
+  button{font:inherit;border:0;border-radius:10px;padding:12px 20px;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:var(--ink)}
+  input[type=text]{font:inherit;width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:10px;background:#fdfcfa}
+  /* progress */
+  .progress-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:24px;font-size:.85rem;color:var(--muted)}
+  .bar{height:6px;background:var(--border);border-radius:3px;margin-top:8px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .25s}
+  /* options */
+  .qtext{font-size:1.2rem;font-weight:600;margin:6px 0 18px}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fdfcfa;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px;color:var(--ink)}
+  .opt:hover{border-color:var(--accent)}
+  .opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .opt .key{flex:0 0 auto;min-width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.85rem;padding:0 6px}
+  .opt.sel .key{background:var(--accent);color:#fff}
+  .nav-row{display:flex;justify-content:space-between;margin-top:22px}
+  .hint{font-size:.8rem;color:var(--muted);margin-top:14px}
+  /* results */
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .win td{font-weight:700;color:var(--accent)}
+  .res-head{border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:6px}
+  .res-head h1{font-size:1.35rem}
+  .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:2px 10px;font-weight:700}
+  details{margin-top:14px}
+  summary{cursor:pointer;color:var(--muted)}
+  .ans-item{font-size:.85rem;padding:4px 0;border-bottom:1px dashed var(--border)}
+  .ans-item b{color:var(--accent)}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+  @media print{
+    body{background:#fff}
+    .wrap{max-width:100%;padding:0}
+    .no-print,#start,#quiz{display:none!important}
+    #results{display:block!important}
+    .card{border:0;padding:0;margin-top:18px;break-inside:avoid}
+    details{display:block}
+    details>*{display:block}
+    summary{display:none}
+    a{color:inherit;text-decoration:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- START -->
+  <section id="start">
+    <h1>Chestionare terapie de cuplu</h1>
+    <p class="muted">AAS (stil de atașament) · Cele 5 limbaje ale iubirii · A.D.I. (accesibilitate – disponibilitate – implicare emoțională)</p>
+    <div class="card">
+      <p>43 de întrebări, una pe ecran. La final primești un raport cu scorurile calculate, pe care îl poți printa sau salva ca PDF.</p>
+      <p><strong>Completează chestionarele independent, fără să te consulți cu partenerul/partenera.</strong> Răspunsurile rămân doar în acest browser — nimic nu pleacă pe internet.</p>
+      <label for="name" style="font-weight:600">Numele tău</label>
+      <input type="text" id="name" placeholder="ex: Florin" style="margin-top:6px">
+      <div class="actions">
+        <button class="btn-primary" onclick="startQuiz()">Începe</button>
+        <button class="btn-ghost" id="resumeBtn" style="display:none" onclick="resumeQuiz()">Continuă de unde ai rămas</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" style="display:none">
+    <div class="progress-row"><span id="secLabel"></span><span id="counter"></span></div>
+    <div class="bar"><i id="barFill" style="width:0"></i></div>
+    <div class="card" id="stepCard"></div>
+    <p class="hint no-print">Poți răspunde și de la tastatură (1–6 sau A–E). Un click pe un răspuns trece automat la următoarea întrebare.</p>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" style="display:none"></section>
+
+</div>
+
+<script>
+"use strict";
+/* ============ DATE CHESTIONARE ============ */
+
+const SCALE5 = ["dezacord puternic","dezacord parțial","nu știu","acord parțial","acord puternic"];
+const SCALE6 = ["dezacord total","dezacord","mai degrabă în dezacord decât de acord","mai degrabă de acord decât în dezacord","acord","acord total"];
+
+const AAS_ITEMS = [
+"Mă simt neplăcut să ajung să depind de alții.",
+"Oamenii nu sunt niciodată acolo unde ai nevoie de ei.",
+"Mă simt în largul meu atunci când depind de alții.",
+"Știu că ceilalți vor fi acolo unde am nevoie de ei.",
+"Îmi este greu să am încredere în ceilalți.",
+"Nu sunt sigur că pot avea întotdeauna încredere că ceilalți vor fi acolo unde am nevoie de ei.",
+"Nu mă îngrijorez frecvent că voi fi abandonat.",
+"Adesea îmi este teamă că de fapt partenerul/partenera nu mă iubește.",
+"Mi se pare că ceilalți sunt rezervați în a-mi deveni apropiați pe cât mi-ar plăcea mie.",
+"Îmi este teamă adesea că partenerul/partenera nu vrea să rămână cu mine.",
+"Îmi doresc o comuniune completă cu o altă persoană.",
+"Dorința mea de comuniune îi sperie câteodată pe ceilalți.",
+"Mi se pare relativ ușor să mă apropii de ceilalți.",
+"Nu mă îngrijorez frecvent că cineva mi-ar putea deveni prea apropiat.",
+"Mă simt oarecum stingherit să fiu apropiat cu ceilalți.",
+"Mă irită ca cineva să vrea să îmi devină prea apropiat.",
+"Mă simt în largul meu când ceilalți depind de mine.",
+"Adesea iubitul/iubita mea vrea să fim mai intimi unul cu celălalt decât mă simt eu bine."
+];
+const AAS_KEYS = { // itemi 1-based
+  "securizant":[3,4,7,13,14,17],
+  "evitant":[1,2,5,15,16,18],
+  "anxios-ambivalent":[6,8,9,10,11,12]
+};
+
+const LIM_ITEMS = [
+{q:"Ce vă face să vă simțiți cel mai iubit/ă?",o:[
+ "Când partenerul/partenera îmi spune „Te iubesc”.",
+ "Când am parte de excursii sau ieșiri împreună cu partenerul/partenera.",
+ "Când primesc cadouri neașteptate.",
+ "Când partenerul/partenera mă ajută cu treburile casnice.",
+ "Când partenerul/partenera mă ia de mână în public."]},
+{q:"Cum preferați să vă exprimați afecțiunea față de partener/parteneră?",o:[
+ "Prin a-i oferi complimente și cuvinte de încurajare.",
+ "Prin a petrece timp de calitate împreună, fără distrageri.",
+ "Prin a dărui mici atenții care arată cât de mult îmi pasă.",
+ "Prin a-i fi de ajutor și a-l sprijini în activitățile sale.",
+ "Prin îmbrățișări și săruturi afectuoase."]},
+{q:"Ce vă aduce cel mai mult bucurie într-o relație?",o:[
+ "Cuvinte de laudă și apreciere.",
+ "Conversații profunde și timp împreună.",
+ "Primirea de daruri bine alese.",
+ "Ajutorul oferit în momente cheie.",
+ "Atingeri tandre și frecvente."]},
+{q:"Ce vă face să vă simțiți apreciat/ă de partener/parteneră?",o:[
+ "Mulțumiri verbale pentru lucrurile pe care le fac.",
+ "Să facem activități împreună care ne plac amândurora.",
+ "Surprizele mici care arată că se gândește la mine.",
+ "Când îmi ia sarcinile de pe umeri.",
+ "Când îmi arată afecțiunea fizică des."]},
+{q:"Cum v-ar plăcea să fie rezolvate conflictele în relația dvs.?",o:[
+ "Prin discuții calme și cuvinte de susținere.",
+ "Prin a ne lua timp să fim împreună și să ne înțelegem.",
+ "Prin gesturi de împăcare, cum ar fi un mic cadou.",
+ "Prin a acționa pentru a rezolva problema concretă.",
+ "Prin îmbrățișări de reconciliere."]},
+{q:"Ce stil de comunicare preferați cu partenerul/partenera?",o:[
+ "Mesaje și cuvinte încurajatoare zilnice.",
+ "„Date nights” sau timp rezervat doar pentru noi.",
+ "Comunicarea prin gesturi și mici surprize.",
+ "Discuții practice urmate de oferirea de ajutor.",
+ "Atingeri frecvente și tandre."]},
+{q:"Care sunt lucrurile care vă fac să vă simțiți cel mai puțin iubit/ă?",o:[
+ "Lipsa complimentelor și a recunoașterii verbale.",
+ "Petrecerea timpului separat frecvent.",
+ "Lipsa darurilor sau gesturilor tangibile.",
+ "Lipsa sprijinului practic când am nevoie.",
+ "Lipsa intimității fizice."]},
+{q:"Ce formă de ajutor din partea partenerului/partenerei ar conta cel mai mult pentru dvs.?",o:[
+ "Susținerea și încurajarea constantă.",
+ "Timpul petrecut împreună, chiar și în zilele aglomerate.",
+ "Cadouri care reflectă cunoașterea și aprecierea.",
+ "Participarea activă la sarcinile cotidiene.",
+ "Atingerile fizice care exprimă afecțiunea."]},
+{q:"Ce vă doriți să auziți din partea partenerului/partenerei?",o:[
+ "Complimente sincere despre cât de mult sunt apreciat/ă.",
+ "Propuneri de activități pe care să le facem împreună.",
+ "Expresii de surprindere, cum ar fi: „am un cadou pentru tine”.",
+ "Întrebări precum „cum te pot ajuta astăzi?”.",
+ "Propuneri de momente intime."]},
+{q:"Ce gesturi vă fac să vă simțiți cel mai iubit/ă?",o:[
+ "Complimentele și susținerea verbală.",
+ "Activitățile împărtășite și timpul de calitate.",
+ "Cadourile semnificative.",
+ "Acordarea de ajutor practic.",
+ "Îmbrățișările și tandrețea fizică."]}
+];
+const LIM_MEANING = {
+  A:["Cuvintele de apreciere","Apreciați comunicarea verbală pozitivă."],
+  B:["Timpul de calitate","Valorați timpul acordat și atenția neîntreruptă."],
+  C:["Cadourile","Apreciați gesturile vizibile care exprimă iubirea și recunoștința."],
+  D:["Serviciile","Vă simțiți iubit/ă prin acțiuni concrete și ajutor oferit."],
+  E:["Atingerea fizică","Îmbrățișările și atingerile sunt esențiale pentru a vă simți iubit/ă."]
+};
+
+const ADI_ITEMS = [
+["A.1","Pot capta ușor atenția partenerului meu/partenerei mele."],
+["A.2","Partenerul meu/partenera mea este o persoană cu care mă pot conecta din punct de vedere emoțional."],
+["A.3","Partenerul meu/partenera mea îmi arată că sunt cea mai importantă persoană din viața lui/ei."],
+["A.4","Nu mă simt singur(ă) în relația pe care o am în prezent cu partenerul meu/partenera mea."],
+["A.5","Pot împărtăși sentimentele mele cele mai profunde partenerului meu/partenerei mele, pentru că el/ea mă va asculta."],
+["D.1","Atunci când am nevoie de apropiere și confort, partenerul meu/partenera mea va fi acolo pentru mine."],
+["D.2","Partenerul meu/partenera mea răspunde semnalelor că am nevoie de el/ea să îmi fie alături."],
+["D.3","Consider că pot conta pe partenerul meu/partenera mea atunci când am temeri sau mă simt nesigur(ă)."],
+["D.4","Chiar și atunci când ne certăm sau ne contrazicem, știu că sunt important(ă) pentru partenerul meu/partenera mea și vom găsi o cale să ne împăcăm."],
+["D.5","Dacă am nevoie să mă asigur cât de important(ă) sunt pentru partenerul meu/partenera mea, știu că îmi va răspunde."],
+["I.1","Mă simt foarte confortabil atunci când sunt aproape de partenerul meu/partenera mea."],
+["I.2","Pot avea încredere în partenerul meu/partenera mea cu privire la aproape orice."],
+["I.3","Chiar și atunci când suntem la distanță fizic unul de altul, sunt sigur(ă) că suntem conectați emoțional unul cu celălalt."],
+["I.4","Știu că partenerului meu/partenerei mele îi pasă de bucuriile, de durerile și temerile mele."],
+["I.5","Mă simt destul de securizat(ă) în relația cu partenerul meu/partenera mea, încât pot să-i spun și cele mai ascunse lucruri, care m-ar putea face vulnerabil(ă)."]
+];
+
+/* ============ PAȘI (intro-uri + întrebări) ============ */
+
+const STEPS = [];
+STEPS.push({type:"intro", sec:"AAS", title:"1 · Chestionarul de atașament (AAS)",
+  text:"18 afirmații. Alege pentru fiecare cât de mult ți se potrivește, pe scala: 1 – dezacord puternic · 2 – dezacord parțial · 3 – nu știu · 4 – acord parțial · 5 – acord puternic."});
+AAS_ITEMS.forEach((t,i)=>STEPS.push({type:"q", quiz:"aas", sec:"AAS · Atașament", i, text:t, opts:SCALE5.map((l,k)=>(k+1)+" – "+l), keys:["1","2","3","4","5"]}));
+STEPS.push({type:"intro", sec:"LIM", title:"2 · Cele 5 limbaje ale iubirii",
+  text:"10 întrebări. Alege varianta (A–E) care ți se potrivește cel mai bine."});
+LIM_ITEMS.forEach((it,i)=>STEPS.push({type:"q", quiz:"lim", sec:"Limbajele iubirii", i, text:(i+1)+". "+it.q, opts:it.o, keys:["A","B","C","D","E"]}));
+STEPS.push({type:"intro", sec:"ADI", title:"3 · Chestionarul A.D.I.",
+  text:"Accesibilitate – Disponibilitate – Implicare emoțională. 15 afirmații despre partenerul/partenera ta, notate de la 1 la 6: 1 – dezacord total · 2 – dezacord · 3 – mai degrabă în dezacord · 4 – mai degrabă de acord · 5 – acord · 6 – acord total. Completează independent, fără să te consulți cu partenerul/partenera."});
+ADI_ITEMS.forEach((it,i)=>STEPS.push({type:"q", quiz:"adi", sec:"A.D.I.", i, text:it[0]+" — "+it[1], opts:SCALE6.map((l,k)=>(k+1)+" – "+l), keys:["1","2","3","4","5","6"]}));
+
+const TOTAL_Q = STEPS.filter(s=>s.type==="q").length;
+const LS_KEY = "chestionare-cuplu-v1";
+
+/* ============ STARE ============ */
+
+let state = { name:"", step:0, answers:{aas:{},lim:{},adi:{}} };
+
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)); }catch(e){ return null; } }
+
+/* ============ FLUX ============ */
+
+function show(id){ ["start","quiz","results"].forEach(s=>document.getElementById(s).style.display = s===id?"":"none"); }
+
+function startQuiz(){
+  state = { name:document.getElementById("name").value.trim(), step:0, answers:{aas:{},lim:{},adi:{}} };
+  save(); show("quiz"); render();
+}
+function resumeQuiz(){
+  const s = load(); if(!s) return;
+  state = s;
+  if(answeredCount()>=TOTAL_Q){ showResults(); } else { show("quiz"); render(); }
+}
+function answeredCount(){
+  return Object.keys(state.answers.aas).length + Object.keys(state.answers.lim).length + Object.keys(state.answers.adi).length;
+}
+
+function render(){
+  const st = STEPS[state.step];
+  const card = document.getElementById("stepCard");
+  const done = answeredCount();
+  document.getElementById("counter").textContent = st.type==="q" ? "Întrebarea "+(qNumber(state.step))+" din "+TOTAL_Q : "";
+  document.getElementById("secLabel").textContent = st.type==="q" ? st.sec : "";
+  document.getElementById("barFill").style.width = Math.round(done/TOTAL_Q*100)+"%";
+
+  if(st.type==="intro"){
+    card.innerHTML = "<h2>"+st.title+"</h2><p>"+st.text+"</p>"+
+      '<div class="nav-row">'+backBtn()+'<button class="btn-primary" onclick="next()">Continuă</button></div>';
+    return;
+  }
+  const cur = state.answers[st.quiz][st.i];
+  card.innerHTML = '<div class="qtext">'+st.text+'</div>'+
+    st.opts.map((o,k)=>'<button class="opt'+(cur===k?" sel":"")+'" onclick="answer('+k+')"><span class="key">'+st.keys[k]+'</span><span>'+o+'</span></button>').join("")+
+    '<div class="nav-row">'+backBtn()+(cur!==undefined?'<button class="btn-ghost" onclick="next()">Înainte →</button>':"<span></span>")+'</div>';
+}
+function qNumber(stepIdx){
+  let n=0; for(let j=0;j<=stepIdx;j++) if(STEPS[j].type==="q") n++;
+  return n;
+}
+function backBtn(){ return state.step>0 ? '<button class="btn-ghost" onclick="back()">← Înapoi</button>' : "<span></span>"; }
+
+function answer(k){
+  const st = STEPS[state.step];
+  state.answers[st.quiz][st.i] = k;
+  save(); render();
+  setTimeout(next, 260);
+}
+function next(){
+  if(state.step < STEPS.length-1){ state.step++; save(); render(); }
+  else if(answeredCount()>=TOTAL_Q){ showResults(); }
+}
+function back(){ if(state.step>0){ state.step--; save(); render(); } }
+
+document.addEventListener("keydown", e=>{
+  if(document.getElementById("quiz").style.display==="none") return;
+  const st = STEPS[state.step];
+  if(e.key==="ArrowLeft") back();
+  else if(e.key==="ArrowRight"||e.key==="Enter"){ if(st.type==="intro"||state.answers[st.quiz]?.[st.i]!==undefined) next(); }
+  else if(st.type==="q"){
+    const idx = st.keys.indexOf(e.key.toUpperCase());
+    if(idx>=0) answer(idx);
+  }
+});
+
+/* ============ SCORARE ============ */
+
+function scoreAAS(){
+  const a = state.answers.aas; // 0-based idx -> 0..4
+  const res = {};
+  for(const [stil,items] of Object.entries(AAS_KEYS)){
+    const sum = items.reduce((s,n)=>s+(a[n-1]+1),0);
+    res[stil] = { sum, mean: sum/items.length };
+  }
+  const max = Math.max(...Object.values(res).map(r=>r.mean));
+  const dominant = Object.keys(res).filter(k=>res[k].mean===max);
+  return {res, dominant};
+}
+function scoreLIM(){
+  const counts = {A:0,B:0,C:0,D:0,E:0};
+  Object.values(state.answers.lim).forEach(k=>counts["ABCDE"[k]]++);
+  const sorted = Object.entries(counts).sort((x,y)=>y[1]-x[1]);
+  const primary = sorted.filter(([,v])=>v===sorted[0][1]).map(([k])=>k);
+  const secondVal = sorted.find(([,v])=>v<sorted[0][1]);
+  const secondary = secondVal ? sorted.filter(([,v])=>v===secondVal[1]).map(([k])=>k) : [];
+  return {counts, sorted, primary, secondary};
+}
+function scoreADI(){
+  const a = state.answers.adi;
+  const sub = {"Accesibilitate":[0,5],"Disponibilitate (deschidere)":[5,10],"Implicare emoțională":[10,15]};
+  const res = {}; let total=0;
+  for(const [name,[s,e]] of Object.entries(sub)){
+    let sum=0; for(let i=s;i<e;i++) sum += a[i]+1;
+    res[name]=sum; total+=sum;
+  }
+  return {res, total};
+}
+
+/* ============ RAPORT ============ */
+
+function fmt(n){ return (Math.round(n*100)/100).toLocaleString("ro-RO"); }
+function stilLabel(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function resultsHTML(){
+  const aas = scoreAAS(), lim = scoreLIM(), adi = scoreADI();
+  const date = new Date().toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"});
+  const who = state.name ? state.name : "—";
+
+  let h = '<div class="res-head"><h1>Rezultate chestionare — terapie de cuplu</h1>'+
+    '<p class="muted">Nume: <strong>'+esc(who)+'</strong> · Data: '+date+'</p></div>';
+
+  /* AAS */
+  h += '<div class="card"><h2>1 · Stilul de atașament (AAS)</h2>'+
+    '<p>Stil dominant: <span class="badge">'+aas.dominant.map(stilLabel).join(" / ")+'</span>'+
+    (aas.dominant.length>1?' <span class="muted">(scoruri egale)</span>':"")+'</p>'+
+    '<table><tr><th>Stil</th><th style="text-align:right">Sumă itemi</th><th style="text-align:right">Medie (din 5)</th></tr>'+
+    Object.entries(aas.res).map(([k,r])=>'<tr'+(aas.dominant.includes(k)?' class="win"':"")+'><td>'+stilLabel(k)+'</td><td class="num">'+r.sum+' / 30</td><td class="num">'+fmt(r.mean)+'</td></tr>').join("")+
+    '</table><p class="muted" style="font-size:.85rem">Itemi: securizant 3+4+7+13+14+17 · evitant 1+2+5+15+16+18 · anxios-ambivalent 6+8+9+10+11+12. Stilul cu media cea mai mare este considerat dominant.</p></div>';
+
+  /* LIM */
+  h += '<div class="card"><h2>2 · Cele 5 limbaje ale iubirii</h2>'+
+    '<p>Limbaj principal: <span class="badge">'+lim.primary.map(k=>LIM_MEANING[k][0]).join(" / ")+'</span>'+
+    (lim.secondary.length?' &nbsp;·&nbsp; secundar: <strong>'+lim.secondary.map(k=>LIM_MEANING[k][0]).join(" / ")+'</strong>':"")+'</p>'+
+    '<table><tr><th></th><th>Limbaj</th><th style="text-align:right">Puncte</th></tr>'+
+    lim.sorted.map(([k,v])=>'<tr'+(lim.primary.includes(k)?' class="win"':"")+'><td>'+k+'</td><td>'+LIM_MEANING[k][0]+' <span class="muted">— '+LIM_MEANING[k][1]+'</span></td><td class="num">'+v+' / 10</td></tr>').join("")+
+    '</table></div>';
+
+  /* ADI */
+  h += '<div class="card"><h2>3 · A.D.I. — Accesibilitate · Disponibilitate · Implicare emoțională</h2>'+
+    '<p>Scor total: <span class="badge">'+adi.total+' / 90</span></p>'+
+    '<table><tr><th>Subscală</th><th style="text-align:right">Scor</th></tr>'+
+    Object.entries(adi.res).map(([k,v])=>'<tr><td>'+k+'</td><td class="num">'+v+' / 30</td></tr>').join("")+
+    '</table></div>';
+
+  /* Anexă răspunsuri */
+  h += '<div class="card"><details open><summary><strong>Anexă — răspunsurile complete</strong></summary>'+
+    '<h2 style="margin-top:14px;font-size:1rem">AAS</h2>'+
+    AAS_ITEMS.map((t,i)=>'<div class="ans-item">'+(i+1)+'. '+t+' — <b>'+(state.answers.aas[i]+1)+'</b> <span class="muted">('+SCALE5[state.answers.aas[i]]+')</span></div>').join("")+
+    '<h2 style="margin-top:14px;font-size:1rem">Cele 5 limbaje ale iubirii</h2>'+
+    LIM_ITEMS.map((it,i)=>'<div class="ans-item">'+(i+1)+'. '+it.q+' — <b>'+"ABCDE"[state.answers.lim[i]]+'</b> <span class="muted">'+it.o[state.answers.lim[i]]+'</span></div>').join("")+
+    '<h2 style="margin-top:14px;font-size:1rem">A.D.I.</h2>'+
+    ADI_ITEMS.map((it,i)=>'<div class="ans-item">'+it[0]+' '+it[1]+' — <b>'+(state.answers.adi[i]+1)+'</b> <span class="muted">('+SCALE6[state.answers.adi[i]]+')</span></div>').join("")+
+    '</details></div>';
+
+  return h;
+}
+function esc(s){ return s.replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function showResults(){
+  const el = document.getElementById("results");
+  el.innerHTML = resultsHTML() +
+    '<div class="actions no-print">'+
+    '<button class="btn-primary" onclick="window.print()">Printează / Salvează PDF</button>'+
+    '<button class="btn-ghost" onclick="exportHTML()">Descarcă rezultatele (HTML)</button>'+
+    '<button class="btn-ghost" onclick="exportMD()">Descarcă raport MD</button>'+
+    '<button class="btn-ghost" id="copyMdBtn" onclick="copyMD()">Copiază raport MD</button>'+
+    '<button class="btn-ghost" onclick="restart()">Reia de la zero (partenerul următor)</button>'+
+    '</div>';
+  show("results");
+  window.scrollTo(0,0);
+}
+
+function slugName(){ return (state.name||"cuplu").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function download(content, mime, filename){
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportHTML(){
+  const css = document.querySelector("style").textContent;
+  const doc = '<!doctype html><html lang="ro"><head><meta charset="utf-8"><title>Rezultate chestionare — '+esc(state.name||"cuplu")+'</title><style>'+css+'</style></head><body><div class="wrap">'+resultsHTML()+'</div></body></html>';
+  download(doc, "text/html;charset=utf-8", "rezultate-"+slugName()+"-"+today()+".html");
+}
+
+/* Raport Markdown — pentru analiză de către un agent AI */
+function mdReport(){
+  const aas = scoreAAS(), lim = scoreLIM(), adi = scoreADI();
+  const date = new Date().toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"});
+  const L = [];
+  L.push("# Rezultate chestionare — terapie de cuplu");
+  L.push("");
+  L.push("- **Nume**: "+(state.name||"—"));
+  L.push("- **Data**: "+date);
+  L.push("");
+  L.push("> Document generat automat. Conține răspunsurile complete și scorurile la trei chestionare folosite în terapia de cuplu: AAS (stil de atașament adult), Cele 5 limbaje ale iubirii și A.D.I. — Accesibilitate · Disponibilitate · Implicare emoțională (percepția asupra partenerului/partenerei). Poate fi folosit ca input pentru o analiză detaliată a tiparelor relaționale.");
+  L.push("");
+  L.push("## 1 · AAS — Stilul de atașament");
+  L.push("");
+  L.push("Scală: 1 – dezacord puternic · 2 – dezacord parțial · 3 – nu știu · 4 – acord parțial · 5 – acord puternic. Scorare: media itemilor pe fiecare stil (securizant 3+4+7+13+14+17, evitant 1+2+5+15+16+18, anxios-ambivalent 6+8+9+10+11+12); stilul cu media cea mai mare e dominant.");
+  L.push("");
+  L.push("| Stil | Sumă | Medie (din 5) |");
+  L.push("|---|---|---|");
+  for(const [k,r] of Object.entries(aas.res))
+    L.push("| "+stilLabel(k)+" | "+r.sum+" / 30 | "+fmt(r.mean)+" |");
+  L.push("");
+  L.push("**Stil dominant: "+aas.dominant.map(stilLabel).join(" / ")+"**"+(aas.dominant.length>1?" (scoruri egale)":""));
+  L.push("");
+  L.push("### Răspunsuri AAS");
+  L.push("");
+  AAS_ITEMS.forEach((t,i)=>L.push((i+1)+". "+t+" — **"+(state.answers.aas[i]+1)+"** ("+SCALE5[state.answers.aas[i]]+")"));
+  L.push("");
+  L.push("## 2 · Cele 5 limbaje ale iubirii");
+  L.push("");
+  L.push("| Limbaj | Puncte |");
+  L.push("|---|---|");
+  lim.sorted.forEach(([k,v])=>L.push("| "+k+" — "+LIM_MEANING[k][0]+" | "+v+" / 10 |"));
+  L.push("");
+  L.push("**Limbaj principal: "+lim.primary.map(k=>LIM_MEANING[k][0]).join(" / ")+"** — "+lim.primary.map(k=>LIM_MEANING[k][1]).join(" "));
+  if(lim.secondary.length) L.push("Limbaj secundar: **"+lim.secondary.map(k=>LIM_MEANING[k][0]).join(" / ")+"**");
+  L.push("");
+  L.push("### Răspunsuri limbaje");
+  L.push("");
+  LIM_ITEMS.forEach((it,i)=>L.push((i+1)+". "+it.q+" — **"+"ABCDE"[state.answers.lim[i]]+"**: "+it.o[state.answers.lim[i]]));
+  L.push("");
+  L.push("## 3 · A.D.I. — Accesibilitate · Disponibilitate · Implicare emoțională");
+  L.push("");
+  L.push("Scală: 1 – dezacord total · 2 – dezacord · 3 – mai degrabă în dezacord · 4 – mai degrabă de acord · 5 – acord · 6 – acord total. Afirmațiile sunt despre partenerul/partenera respondentului.");
+  L.push("");
+  L.push("| Subscală | Scor |");
+  L.push("|---|---|");
+  for(const [k,v] of Object.entries(adi.res)) L.push("| "+k+" | "+v+" / 30 |");
+  L.push("");
+  L.push("**Scor total: "+adi.total+" / 90**");
+  L.push("");
+  L.push("### Răspunsuri A.D.I.");
+  L.push("");
+  ADI_ITEMS.forEach((it,i)=>L.push("- "+it[0]+" "+it[1]+" — **"+(state.answers.adi[i]+1)+"** ("+SCALE6[state.answers.adi[i]]+")"));
+  L.push("");
+  return L.join("\n");
+}
+function exportMD(){
+  download(mdReport(), "text/markdown;charset=utf-8", "raport-"+slugName()+"-"+today()+".md");
+}
+function copyMD(){
+  const btn = document.getElementById("copyMdBtn");
+  const done = t=>{ btn.textContent=t; setTimeout(()=>btn.textContent="Copiază raport MD",1500); };
+  navigator.clipboard.writeText(mdReport()).then(()=>done("Copiat ✓")).catch(()=>done("Nu s-a putut copia"));
+}
+
+function restart(){
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  state = { name:"", step:0, answers:{aas:{},lim:{},adi:{}} };
+  document.getElementById("name").value = "";
+  show("start");
+  document.getElementById("resumeBtn").style.display = "none";
+}
+
+/* init */
+(function(){
+  const s = load();
+  if(s && answeredFrom(s)>0){
+    const btn = document.getElementById("resumeBtn");
+    btn.style.display = "";
+    btn.textContent = answeredFrom(s)>=TOTAL_Q ? "Vezi rezultatele salvate"+(s.name?" ("+s.name+")":"") : "Continuă de unde ai rămas"+(s.name?" ("+s.name+")":"")+" — "+answeredFrom(s)+"/"+TOTAL_Q;
+    if(s.name) document.getElementById("name").value = s.name;
+  }
+  function answeredFrom(x){ return Object.keys(x.answers.aas).length+Object.keys(x.answers.lim).length+Object.keys(x.answers.adi).length; }
+})();
+</script>
+</body>
+</html>
